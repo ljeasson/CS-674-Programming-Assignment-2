@@ -4,6 +4,7 @@ PGM parsing library for CS674 (Image Processing) at UNR.
 
 """
 
+from copy import deepcopy
 from pathlib import Path
 from typing import Dict, List
 
@@ -112,7 +113,7 @@ class PGMImage:
 
         return histogram
 
-    def __add__(self, other) -> PGMImage:
+    def __add__(self, other):
         """ Sum pixel values in one image with those in another image. """
         if isinstance(other, PGMImage):
             assert (self.rows, self.cols) == (
@@ -120,20 +121,23 @@ class PGMImage:
                 other.cols,
             ), "Images must be of the same sizes to be added."
 
-            res = copy.deepcopy(self)
+            res = deepcopy(self)
 
             for i in range(self.rows):
                 my_row = [b for b in self.pixels[i]]
                 their_row = [b for b in other.pixels[i]]
                 res.pixels[i] = b"".join(
-                    [min(x + y, self.quantization) for x, y in zip(my_row, their_row)]
+                    [
+                        bytes([min(x + y, self.quantization)])
+                        for x, y in zip(my_row, their_row)
+                    ]
                 )
 
             return res
 
         super().__add__(other)
 
-    def __sub__(self, other) -> PGMImage:
+    def __sub__(self, other):
         """ Difference of pixel values in one image with those in another image. """
         if isinstance(other, PGMImage):
             assert (self.rows, self.cols) == (
@@ -141,13 +145,13 @@ class PGMImage:
                 other.cols,
             ), "Images must be of the same sizes to be added."
 
-            res = copy.deepcopy(self)
+            res = deepcopy(self)
 
             for i in range(self.rows):
                 my_row = [b for b in self.pixels[i]]
                 their_row = [b for b in other.pixels[i]]
                 res.pixels[i] = b"".join(
-                    [max(x - y, 0) for x, y in zip(my_row, their_row)]
+                    [bytes([max(x - y, 0)]) for x, y in zip(my_row, their_row)]
                 )
 
             return res

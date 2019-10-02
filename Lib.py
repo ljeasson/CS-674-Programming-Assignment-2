@@ -11,7 +11,7 @@ class Kernel:
 
     @property
     def sz(self) -> int:
-        return len(mask)
+        return len(self.mask)
 
 
 def spatially_filtered(pgm_filename: str, k: Kernel) -> PGMImage:
@@ -32,12 +32,23 @@ def spatially_filtered(pgm_filename: str, k: Kernel) -> PGMImage:
             for s in range(k.sz):
                 for t in range(k.sz):
                     x, y = i - int(k.sz / 2) + s, j - int(k.sz / 2) + t
+                    # Pad edges of the image with zeros
+                    if x < 0 or x >= p1.rows:
+                        x = 0
+                    if y < 0 or y >= p1.cols:
+                        y = 0
                     # print(f"i = {i} j = {j} s = {s} t = {t} x = {x} y = {y}")
                     pxl += p1.pixels[x][y] * k.mask[s][t]
 
             new_row.append(pxl)
 
-        p2.pixels[i] = b"".join([bytes([b]) for b in new_row])
+        def coerce(b):
+            """ Force values to fall between 0, 255 for PGM images. """
+            b = max(b, 0)
+            b = min(b, 255)
+            return b
+
+        p2.pixels[i] = b"".join([bytes([coerce(b)]) for b in new_row])
 
     return p2
 
