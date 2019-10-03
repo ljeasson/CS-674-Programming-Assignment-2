@@ -23,6 +23,13 @@ def spatially_filtered(pgm_filename: str, k: Kernel) -> PGMImage:
     """
     p1, p2 = PGMImage(pgm_filename), PGMImage(pgm_filename)
 
+    def coerce(b):
+        """ Force values to fall between 0, 255 for PGM images. """
+        b = max(b, 0)
+        b = min(b, 255)
+        b = int(b)
+        return b
+
     for i in range(p1.rows):
         new_row = []
         old_row = [b for b in p1.pixels[i]]
@@ -41,12 +48,6 @@ def spatially_filtered(pgm_filename: str, k: Kernel) -> PGMImage:
                     pxl += p1.pixels[x][y] * k.mask[s][t]
 
             new_row.append(pxl)
-
-        def coerce(b):
-            """ Force values to fall between 0, 255 for PGM images. """
-            b = max(b, 0)
-            b = min(b, 255)
-            return b
 
         p2.pixels[i] = b"".join([bytes([coerce(b)]) for b in new_row])
 
