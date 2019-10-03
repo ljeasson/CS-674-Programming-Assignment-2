@@ -72,6 +72,8 @@ class PGMImage:
 
     def save(self, pgm_filename):
         """ Write this PGM image to a file. """
+        if True:
+            print(f"Saving {self.name} to {pgm_filename}.")
 
         def itobs(i: int) -> bytes:
             """ Convert integer to byte string. """
@@ -119,7 +121,7 @@ class PGMImage:
             assert (self.rows, self.cols) == (
                 other.rows,
                 other.cols,
-            ), "Images must be of the same sizes to be added."
+            ), "Images must be of the same sizes to be subtracted."
 
             res = deepcopy(self)
 
