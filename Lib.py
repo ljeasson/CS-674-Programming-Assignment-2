@@ -33,6 +33,16 @@ def spatially_filtered_ffi(pgm_filename: str, k: Kernel) -> PGMImage:
 
         return c_2d_arr
 
+    def c_2d_arr_empty(arr_type, row_type, rows, cols):
+        c_2d_arr = arr_type()
+        for i in range(rows):
+            row = row_type()
+            for j in range(cols):
+                row[j] = 0
+            c_2d_arr[i] = c_pointer_to(row)
+
+        return c_2d_arr
+
     C_PGMRowT = c_char * p.cols
     C_PGMImageT = PointerT(C_PGMRowT) * p.rows
 
@@ -40,15 +50,16 @@ def spatially_filtered_ffi(pgm_filename: str, k: Kernel) -> PGMImage:
     C_KernelT = PointerT(C_KernelRowT) * k.rows
 
     c_p = c_2d_arr_from_pyobj(p.pixels, C_PGMImageT, C_PGMRowT)
+    c_p_2 = c_2d_arr_empty(C_PGMImageT, C_PGMRowT, p.rows, p.cols)
     c_k = c_2d_arr_from_pyobj(k.mask, C_KernelT, C_KernelRowT)
 
     spatialfilter = ctypes.cdll.LoadLibrary("./spatialfilter.so")
 
-    spatialfilter.apply_spatial_filter(c_p, p.cols, p.rows, c_k, k.rows, k.cols)
+    spatialfilter.apply_spatial_filter(c_p, c_p_2, p.cols, p.rows, c_k, k.rows, k.cols)
 
     p2 = PGMImage(pgm_filename)
     for i in range(p.rows):
-        p2.pixels[i] = b"".join([c_p[i][0][j] for j in range(p2.cols)])
+        p2.pixels[i] = b"".join([c_p_2[i][0][j] for j in range(p2.cols)])
 
     return p2
 
