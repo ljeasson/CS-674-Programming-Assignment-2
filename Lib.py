@@ -1,12 +1,10 @@
-from PGM import PGMImage
-
 import ctypes
-import qcore
 
-from ctypes import byref, c_char, c_float, pointer as c_pointer_to, POINTER as PointerT
+from ctypes import c_char, c_float, pointer as c_pointer_to, POINTER as PointerT
 from dataclasses import dataclass
-from math import e, pi
 from typing import List
+
+from PGM import PGMImage
 
 
 @dataclass
@@ -43,8 +41,6 @@ def spatially_filtered_ffi(pgm_filename: str, k: Kernel) -> PGMImage:
 
     c_p = c_2d_arr_from_pyobj(p.pixels, C_PGMImageT, C_PGMRowT)
     c_k = c_2d_arr_from_pyobj(k.mask, C_KernelT, C_KernelRowT)
-
-    import ctypes
 
     spatialfilter = ctypes.cdll.LoadLibrary("./spatialfilter.so")
 
