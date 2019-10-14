@@ -73,23 +73,29 @@ def spatially_filtered(pgm_filename: str, k: Kernel) -> PGMImage:
         b = int(b)
         return b
 
+    half_k_rows = int(k.rows / 2)
+    half_k_cols = int(k.cols / 2)
     for i in range(p1.rows):
         new_row = []
-        old_row = [b for b in p1.pixels[i]]
+        # old_row = [b for b in p1.pixels[i]]
         for j in range(p1.cols):
 
             pxl = 0
-            for s in range(k.sz):
-                for t in range(k.sz):
-                    x, y = i - int(k.sz / 2) + s, j - int(k.sz / 2) + t
+            _x = i - half_k_rows
+            _y = j - half_k_cols
+            for s in range(k.rows):
+                for t in range(k.cols):
+                    x = _x + s
+                    y = _y + t
                     # Pad edges of the image with zeros
-                    if x < 0 or x >= p1.rows:
-                        x = 0
-                    if y < 0 or y >= p1.cols:
-                        y = 0
-                    # print(f"i = {i} j = {j} s = {s} t = {t} x = {x} y = {y}")
-                    pxl += p1.pixels[x][y] * k.mask[s][t]
 
+                    if x < 0 or x >= p1.rows or y < 0 or y >= p1.cols:
+                        p_pxl = 0
+                    else:
+                        p_pxl = p1.pixels[x][y]
+                    # print(f"i = {i} j = {j} s = {s} t = {t} x = {x} y = {y}")
+                    pxl += p_pxl * k.mask[s][t]
+            # print(pxl)
             new_row.append(pxl)
 
         p2.pixels[i] = b"".join([bytes([coerce(b)]) for b in new_row])
