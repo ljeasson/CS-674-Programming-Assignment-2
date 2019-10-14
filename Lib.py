@@ -1,5 +1,9 @@
 from PGM import PGMImage
 
+import ctypes
+import qcore
+
+from ctypes import byref, c_char, c_float, pointer as c_pointer_to, POINTER as PointerT
 from dataclasses import dataclass
 from math import e, pi
 from typing import List
@@ -10,8 +14,47 @@ class Kernel:
     mask: List[List[int]]
 
     @property
-    def sz(self) -> int:
+    def rows(self) -> int:
         return len(self.mask)
+
+    @property
+    def cols(self) -> int:
+        return len(self.mask[0]) if self.mask else 0
+
+
+def spatially_filtered_ffi(pgm_filename: str, k: Kernel) -> PGMImage:
+    p = PGMImage(pgm_filename)
+
+    def c_2d_arr_from_pyobj(pyobj: List[List[int]], arr_type, row_type):
+        c_2d_arr = arr_type()
+        for i in range(len(pyobj)):
+            row = row_type()
+            for j in range(len(pyobj[0])):
+                row[j] = pyobj[i][j]
+            c_2d_arr[i] = c_pointer_to(row)
+
+        return c_2d_arr
+
+    C_PGMRowT = c_char * p.cols
+    C_PGMImageT = PointerT(C_PGMRowT) * p.rows
+
+    C_KernelRowT = c_float * k.cols
+    C_KernelT = PointerT(C_KernelRowT) * k.rows
+
+    c_p = c_2d_arr_from_pyobj(p.pixels, C_PGMImageT, C_PGMRowT)
+    c_k = c_2d_arr_from_pyobj(k.mask, C_KernelT, C_KernelRowT)
+
+    import ctypes
+
+    spatialfilter = ctypes.cdll.LoadLibrary("./spatialfilter.so")
+
+    spatialfilter.apply_spatial_filter(c_p, p.cols, p.rows, c_k, k.rows, k.cols)
+
+    p2 = PGMImage(pgm_filename)
+    for i in range(p.rows):
+        p2.pixels[i] = b"".join([c_p[i][0][j] for j in range(p2.cols)])
+
+    return p2
 
 
 def spatially_filtered(pgm_filename: str, k: Kernel) -> PGMImage:
@@ -61,7 +104,7 @@ def run_tests():
 
         expected = PGMImage(pgm_filename)
 
-        actual = spatially_filtered(pgm_filename, identity_filter)
+        actual = spatially_filtered_ffi(pgm_filename, identity_filter)
 
         assert expected.pixels == actual.pixels
 
