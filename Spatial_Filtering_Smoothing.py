@@ -1,5 +1,7 @@
+from PGM import PGMImage
 import numpy as np
-import math
+from cv2 import cv2
+import matplotlib.pyplot as plt
 
 gaussian_matrix_7 = [ [1,1,2,2,2,1,1], 
                       [1,2,2,4,2,2,1], 
@@ -23,27 +25,28 @@ def make_gaussian_filter(sigma):
     
 
 def smooth_image_averaging(image, sigma):
-    return
+    img = cv2.imread(image)
+    blur = cv2.blur(img,(5,5))
+    
+    plt.subplot(121),plt.imshow(img),plt.title('Original')
+    plt.xticks([]), plt.yticks([])
+    plt.subplot(122),plt.imshow(blur),plt.title('Blurred')
+    plt.xticks([]), plt.yticks([])
+    plt.show()
 
 def smooth_image_gaussian(image, sigma):
-    return
+    img = cv2.imread(image)
+    blur = cv2.GaussianBlur(img,(5,5),0)
+    
+    plt.subplot(121),plt.imshow(img),plt.title('Original')
+    plt.xticks([]), plt.yticks([])
+    plt.subplot(122),plt.imshow(blur),plt.title('Blurred')
+    plt.xticks([]), plt.yticks([])
+    plt.show()
 
 if __name__ == "__main__":
-    print(make_averaging_filter(3))
-    print()
-    print(make_averaging_filter(5))
-    print()
-    print(make_averaging_filter(7))
-
-    '''
-    print(make_gaussian_filter(1.4))
-    print()
-    print(make_gaussian_filter(3))
-    '''
-    '''
     for img in ("images/lenna.pgm", "images/sf.pgm"):
         for i in (7, 15):
             smooth_image_averaging(img, i)
         for j in (7, 15):
             smooth_image_gaussian(img, j)
-    '''
