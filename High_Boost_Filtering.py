@@ -9,8 +9,12 @@ def high_boost_filter_kernel(A):
 def do_high_boost_filtering(pgm_filename, A):
     high_boost_filtered = spatially_filtered(pgm_filename, high_boost_filter_kernel(A))
 
+    p1 = PGMImage(pgm_filename)
+
+    high_boost_filtered.save(f"highboost-filtered-A{A}-{p1.name}")
+
 
 if __name__ == "__main__":
     for img in ("images/lenna.pgm", "images/f_16.pgm"):
         for A in (1, 1.4, 1.9, 2):
-            do_unsharp_masking(img, A)
+            do_high_boost_filtering(img, A)
