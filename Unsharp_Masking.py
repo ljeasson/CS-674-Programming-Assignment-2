@@ -1,4 +1,4 @@
-from Lib import spatially_filtered, Kernel
+from Lib import spatially_filtered_fast, Kernel
 from PGM import PGMImage
 
 smoothing_mask = [
@@ -21,7 +21,7 @@ smoothing_kernel = Kernel(normed_smoothing_mask)
 
 def do_unsharp_masking(pgm_filename: str) -> PGMImage:
     p_orig = PGMImage(pgm_filename)
-    p_lowpass = spatially_filtered(pgm_filename, smoothing_kernel)
+    p_lowpass = spatially_filtered_fast(pgm_filename, smoothing_kernel)
     p_lowpass.save(f"lowpass-{p_lowpass.name}")
 
     p_highpass = p_orig - p_lowpass

@@ -1,4 +1,4 @@
-from Lib import spatially_filtered, Kernel
+from Lib import spatially_filtered_fast, Kernel
 from PGM import PGMImage
 
 
@@ -13,7 +13,7 @@ def do_correlation(pgm_filename, mask_filename):
 
     k = correlation_kernel(pmask)
 
-    p2: PGMImage = spatially_filtered(pgm_filename, k)
+    p2: PGMImage = spatially_filtered_fast(pgm_filename, k)
 
     p2.save(f"correlated-to-{pmask.name}-{p2.name}")
 

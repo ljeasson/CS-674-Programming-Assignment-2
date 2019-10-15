@@ -20,7 +20,7 @@ class Kernel:
         return len(self.mask[0]) if self.mask else 0
 
 
-def spatially_filtered_ffi(pgm_filename: str, k: Kernel) -> PGMImage:
+def spatially_filtered_fast(pgm_filename: str, k: Kernel) -> PGMImage:
     p = PGMImage(pgm_filename)
 
     def c_2d_arr_from_pyobj(pyobj: List[List[int]], arr_type, row_type):
@@ -86,7 +86,6 @@ def spatially_filtered(pgm_filename: str, k: Kernel) -> PGMImage:
     half_k_cols = int(k.cols / 2)
     for i in range(p1.rows):
         new_row = []
-        # old_row = [b for b in p1.pixels[i]]
         for j in range(p1.cols):
 
             pxl = 0
@@ -126,7 +125,7 @@ def run_tests():
 
         expected = PGMImage(pgm_filename)
 
-        actual = spatially_filtered_ffi(pgm_filename, identity_filter)
+        actual = spatially_filtered_fast(pgm_filename, identity_filter)
 
         assert expected.pixels == actual.pixels
 
