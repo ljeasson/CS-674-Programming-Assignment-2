@@ -36,7 +36,7 @@ class PGMImage:
 
             if self.signature != "P5":  # Other formats not used in CS674
                 raise InvalidPGMFormat(
-                    f"Format was {signature}, but only raw greyscale bytes"
+                    f"Format was {self.signature}, but only raw greyscale bytes"
                     " are acceptable."
                 )
 

@@ -1,15 +1,39 @@
+from Lib import spatially_filtered, Kernel
 from PGM import PGMImage
-import numpy as np
-from cv2 import cv2
-import matplotlib.pyplot as plt
 
-gaussian_matrix_7 = [ [1,1,2,2,2,1,1], 
-                      [1,2,2,4,2,2,1], 
-                      [2,2,4,8,4,2,2], 
-                      [2,4,8,16,8,4,2], 
-                      [2,2,4,8,4,2,2], 
-                      [1,2,2,4,2,2,1], 
-                      [1,1,2,2,2,1,1] ] 
+import numpy as np
+
+average_matrix_7 = Kernel(mask = [ [1,1,1,1,1,1,1],
+                                   [1,1,1,1,1,1,1],
+                                   [1,1,1,1,1,1,1],
+                                   [1,1,1,1,1,1,1],
+                                   [1,1,1,1,1,1,1],
+                                   [1,1,1,1,1,1,1],
+                                   [1,1,1,1,1,1,1] ] * (1/7))
+
+average_matrix_15 = Kernel(mask = [ [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1] ] * (1/7))
+
+gaussian_matrix_7 = Kernel(mask=[ [1,1,2,2,2,1,1], 
+                                  [1,2,2,4,2,2,1], 
+                                  [2,2,4,8,4,2,2], 
+                                  [2,4,8,16,8,4,2], 
+                                  [2,2,4,8,4,2,2], 
+                                  [1,2,2,4,2,2,1], 
+                                  [1,1,2,2,2,1,1] ])
 
 def make_averaging_filter(size):
     matrix = np.ones((size,size), dtype=float)
@@ -24,25 +48,20 @@ def make_gaussian_filter(sigma):
     return gaussian_matrix
     
 
-def smooth_image_averaging(image, sigma):
-    img = cv2.imread(image)
-    blur = cv2.blur(img,(5,5))
+def smooth_image_averaging(pgm_filename, sigma):
+    p = PGMImage(pgm_filename)
     
-    plt.subplot(121),plt.imshow(img),plt.title('Original')
-    plt.xticks([]), plt.yticks([])
-    plt.subplot(122),plt.imshow(blur),plt.title('Blurred')
-    plt.xticks([]), plt.yticks([])
-    plt.show()
+    p_average_7 = spatially_filtered(pgm_filename, average_matrix_7)
+    p_average_7.save(f"smoothed_averaging-sigma{sigma}-{p.name}")
 
-def smooth_image_gaussian(image, sigma):
-    img = cv2.imread(image)
-    blur = cv2.GaussianBlur(img,(5,5),0)
+    p_average_15 = spatially_filtered(pgm_filename, average_matrix_15)
+    p_average_15.save(f"smoothed_averaging-sigma{sigma}-{p.name}")
     
-    plt.subplot(121),plt.imshow(img),plt.title('Original')
-    plt.xticks([]), plt.yticks([])
-    plt.subplot(122),plt.imshow(blur),plt.title('Blurred')
-    plt.xticks([]), plt.yticks([])
-    plt.show()
+def smooth_image_gaussian(pgm_filename, sigma):
+    p = PGMImage(pgm_filename)
+    p_gaussian = spatially_filtered(pgm_filename, gaussian_matrix_7)
+    p_gaussian.save(f"smoothed_gaussian-sigma{sigma}-{p.name}")    
+
 
 if __name__ == "__main__":
     for img in ("images/lenna.pgm", "images/sf.pgm"):
@@ -50,3 +69,17 @@ if __name__ == "__main__":
             smooth_image_averaging(img, i)
         for j in (7, 15):
             smooth_image_gaussian(img, j)
+
+'''
+img = cv2.imread(image)
+blur = cv2.blur(img,(5,5))
+
+img = cv2.imread(image)
+blur = cv2.GaussianBlur(img,(5,5),0)
+
+plt.subplot(121),plt.imshow(img),plt.title('Original')
+plt.xticks([]), plt.yticks([])
+plt.subplot(122),plt.imshow(blur),plt.title('Blurred')
+plt.xticks([]), plt.yticks([])
+plt.show()
+'''
