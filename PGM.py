@@ -70,10 +70,41 @@ class PGMImage:
                     f"Finished reading {pgm_filename} but content still left."
                 )
 
-    def save(self, pgm_filename):
-        """ Write this PGM image to a file. """
+    def normalize_intensity_values(self):
+        hi, lo = float("-inf"), 0
+        for i in range(self.rows):
+            for b in self.pixels[i]:
+                hi = max(b, hi)
+                lo = min(b, lo)
+
+        for i in range(self.rows):
+            self.pixels[i] = b"".join(
+                [
+                    bytes([int((px / (-lo + hi)) * self.quantization)])
+                    for px in self.pixels[i]
+                ]
+            )
+
+    def save(self, pgm_filename, normalize=False):
+        """ Write this PGM image to a file. 
+
+        :param pgm_filename Filename to save image to
+        :param normalize Whether to scale all pixel values to highest pixel value
+        """
         if True:
             print(f"Saving {self.name} to {pgm_filename}.")
+
+        if not normalize:
+            # Warn user if they're about to save with out-of-bounds pixel values
+            if any(
+                any(pxl > self.quantization or pxl < 0 for pxl in row)
+                for row in self.pixels
+            ):
+                raise InvalidPGMFormat(
+                    f"Image pixel values > {self.quantization}. Save with normalize=True"
+                )
+        else:
+            self.normalize_intensity_values()
 
         def itobs(i: int) -> bytes:
             """ Convert integer to byte string. """

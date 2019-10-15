@@ -63,6 +63,8 @@ def spatially_filtered_fast(pgm_filename: str, k: Kernel) -> PGMImage:
     for i in range(p.rows):
         p2.pixels[i] = [c_p_2[i][0][j] for j in range(p2.cols)]
 
+    p2.normalize_intensity_values()
+
     return p2
 
 
@@ -114,6 +116,7 @@ def spatially_filtered(pgm_filename: str, k: Kernel) -> PGMImage:
 
         p2.pixels[i] = [int(b) for b in new_row]
 
+        p2.normalize_intensity_values()
 
     return p2
 
