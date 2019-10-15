@@ -1,9 +1,22 @@
 #include <inttypes.h>
 
+unsigned char coerce(double pxl);
+
 void apply_spatial_filter(unsigned char **orig_image,
                           double **final_image, uint16_t width,
                           uint16_t height, double **kernel, uint16_t k_rows,
                           uint16_t k_cols);
+
+/**
+ * Coerce a pixel value into the range [0, 255]
+ */
+inline unsigned char coerce(double pxl) {
+  if (pxl > 255)
+    pxl = 255;
+  if (pxl < 0)
+    pxl = 0;
+  return (unsigned char)pxl;
+}
 
 void apply_spatial_filter(unsigned char **orig_image,
                           double **final_image, uint16_t width,
@@ -13,7 +26,7 @@ void apply_spatial_filter(unsigned char **orig_image,
   uint8_t half_k_cols = (uint8_t)(k_cols / 2);
   for (uint16_t i = 0; i < height; i++) {
     for (uint16_t j = 0; j < width; j++) {
-      unsigned char pxl = 0;
+      double pxl = 0;
 
       for (uint8_t s = 0; s < k_rows; s++) {
         for (uint8_t t = 0; t < k_cols; t++) {
@@ -28,12 +41,8 @@ void apply_spatial_filter(unsigned char **orig_image,
             orig_image_x_y = orig_image[x][y];
 
           double weighted_pxl = orig_image_x_y * kernel[s][t];
-          if (weighted_pxl > 255)
-            weighted_pxl = 255;
-          if (weighted_pxl < 0)
-            weighted_pxl = 0;
 
-          pxl += (unsigned char)weighted_pxl;
+          pxl += coerce(weighted_pxl);
         }
       }
 
