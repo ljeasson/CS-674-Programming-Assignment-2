@@ -20,7 +20,9 @@ class Kernel:
         return len(self.mask[0]) if self.mask else 0
 
 
-def spatially_filtered_fast(pgm_filename: str, k: Kernel) -> PGMImage:
+def spatially_filtered_fast(
+    pgm_filename: str, k: Kernel, normalize=False, truncate=False
+) -> PGMImage:
     p = PGMImage(pgm_filename)
 
     def c_2d_arr_from_pyobj(pyobj: List[List[int]], arr_type, row_type):
@@ -63,12 +65,17 @@ def spatially_filtered_fast(pgm_filename: str, k: Kernel) -> PGMImage:
     for i in range(p.rows):
         p2.pixels[i] = [c_p_2[i][0][j] for j in range(p2.cols)]
 
-    p2.normalize_intensity_values()
+    if normalize:
+        p2.normalize_intensity_values()
+    if truncate:
+        p2.truncate_intensity_values()
 
     return p2
 
 
-def spatially_filtered(pgm_filename: str, k: Kernel) -> PGMImage:
+def spatially_filtered(
+    pgm_filename: str, k: Kernel, normalize=False, truncate=False
+) -> PGMImage:
     """
     Return an image with the spatial filter `k` applied to it.
 
@@ -77,46 +84,30 @@ def spatially_filtered(pgm_filename: str, k: Kernel) -> PGMImage:
     """
     p1, p2 = PGMImage(pgm_filename), PGMImage(pgm_filename)
 
-    def coerce(b):
-        """ Force values to fall between 0, 255 for PGM images. """
-        b = max(b, 0)
-        b = min(b, 255)
-        b = int(b)
-        return b
-
-    half_k_rows = int(k.rows / 2)
-    half_k_cols = int(k.cols / 2)
     for i in range(p1.rows):
         new_row = []
         for j in range(p1.cols):
 
             pxl = 0
-            _x = i - half_k_rows
-            _y = j - half_k_cols
             for s in range(k.rows):
                 for t in range(k.cols):
-                    x = _x + s
-                    y = _y + t
+                    x, y = i - int(k.rows / 2) + s, j - int(k.cols / 2) + t
 
                     # Pad edges of the image with zeros
                     if x < 0 or x >= p1.rows or y < 0 or y >= p1.cols:
                         orig_image_x_y = 0
                     else:
                         orig_image_x_y = p1.pixels[x][y]
-                    weighted_pxl = orig_image_x_y * k.mask[s][t]
+                    pxl += orig_image_x_y * k.mask[s][t]
 
-                    if False:
-                        weighted_pxl = coerce(weighted_pxl)
-
-                    pxl += weighted_pxl
-
-            if False:
-                pxl = coerce(pxl)
             new_row.append(pxl)
 
-        p2.pixels[i] = [int(b) for b in new_row]
+        p2.pixels[i] = new_row
 
+    if normalize:
         p2.normalize_intensity_values()
+    if truncate:
+        p2.truncate_intensity_values()
 
     return p2
 
