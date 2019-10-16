@@ -80,10 +80,20 @@ class PGMImage:
         for i in range(self.rows):
             self.pixels[i] = b"".join(
                 [
-                    bytes([int((px / (-lo + hi)) * self.quantization)])
+                    bytes([int(((px - lo) / (hi - lo)) * self.quantization)])
                     for px in self.pixels[i]
                 ]
             )
+
+    def truncate_intensity_values(self):
+        def truncate(_px):
+            _px = int(_px)
+            _px = min(self.quantization, _px)
+            _px = max(0, _px)
+            return _px
+
+        for i in range(self.rows):
+            self.pixels[i] = b"".join([bytes([truncate(px)]) for px in self.pixels[i]])
 
     def save(self, pgm_filename, normalize=False):
         """ Write this PGM image to a file. 
@@ -101,7 +111,7 @@ class PGMImage:
                 for row in self.pixels
             ):
                 raise InvalidPGMFormat(
-                    f"Image pixel values > {self.quantization}. Save with normalize=True"
+                    f"Image pixel values > {self.quantization}. Normalize or truncate first."
                 )
         else:
             self.normalize_intensity_values()
