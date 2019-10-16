@@ -42,7 +42,7 @@ void apply_spatial_filter(unsigned char **orig_image,
 
           double weighted_pxl = orig_image_x_y * kernel[s][t];
 
-          pxl += coerce(weighted_pxl);
+          pxl += weighted_pxl;
         }
       }
 
