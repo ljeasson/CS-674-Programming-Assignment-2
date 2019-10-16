@@ -1,4 +1,4 @@
-from Lib import spatially_filtered, Kernel
+from Lib import spatially_filtered_fast, Kernel
 from PGM import PGMImage
 
 
@@ -21,10 +21,10 @@ def do_sharpening(pgm_filename):
     p1 = PGMImage(pgm_filename)
 
     # Prewitt filtering
-    p1_x_filtered_prewitt = spatially_filtered(pgm_filename, prewitt_kernel_x)
+    p1_x_filtered_prewitt = spatially_filtered_fast(pgm_filename, prewitt_kernel_x)
     p1_x_filtered_prewitt.save(f"gradient-magnitude-prewitt-x-{p1.name}")
 
-    p1_y_filtered_prewitt = spatially_filtered(pgm_filename, prewitt_kernel_y)
+    p1_y_filtered_prewitt = spatially_filtered_fast(pgm_filename, prewitt_kernel_y)
     p1_y_filtered_prewitt.save(f"gradient-magnitude-prewitt-y-{p1.name}")
 
     p2 = p1_x_filtered_prewitt + p1_y_filtered_prewitt
@@ -34,10 +34,10 @@ def do_sharpening(pgm_filename):
     p3.save(f"prewitt-sharpened-{p1.name}")
 
     # Sobel filtering
-    p1_x_filtered_sobel = spatially_filtered(pgm_filename, sobel_kernel_x)
+    p1_x_filtered_sobel = spatially_filtered_fast(pgm_filename, sobel_kernel_x)
     p1_x_filtered_sobel.save(f"gradient-magnitude-sobel-x-{p1.name}")
 
-    p1_y_filtered_sobel = spatially_filtered(pgm_filename, sobel_kernel_y)
+    p1_y_filtered_sobel = spatially_filtered_fast(pgm_filename, sobel_kernel_y)
     p1_y_filtered_sobel.save(f"gradient-magnitude-sobel-y-{p1.name}")
 
     p2 = p1_x_filtered_sobel + p1_y_filtered_sobel
@@ -46,7 +46,7 @@ def do_sharpening(pgm_filename):
     p3.save(f"sobel-sharpened-{p1.name}")
 
     # Laplace filtering
-    p1_laplace_filtered = spatially_filtered(pgm_filename, laplacian_kernel)
+    p1_laplace_filtered = spatially_filtered_fast(pgm_filename, laplacian_kernel)
     p1_laplace_filtered.save(f"laplacian-gradient-magnitude-{p1.name}")
 
     p2 = p1 - p1_laplace_filtered
