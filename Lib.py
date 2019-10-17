@@ -111,6 +111,81 @@ def spatially_filtered(
 
     return p2
 
+def median_filtered(
+    pgm_filename: str, k: Kernel, normalize=False, truncate=False
+) -> PGMImage:
+    """
+    Return an image with the median filter `k` applied to it.
+
+    :param pgm_filename file name of image to perform filter on
+    :param k a kernel of the spatial filter we want to apply
+    """
+    p1, p2 = PGMImage(pgm_filename), PGMImage(pgm_filename)
+
+    for i in range(p1.rows):
+        new_row = []
+        for j in range(p1.cols):
+
+            pxl = 0
+            for s in range(k.rows):
+                for t in range(k.cols):
+                    x, y = i - int(k.rows / 2) + s, j - int(k.cols / 2) + t
+
+                    # Pad edges of the image with zeros
+                    if x < 0 or x >= p1.rows or y < 0 or y >= p1.cols:
+                        orig_image_x_y = 0
+                    else:
+                        orig_image_x_y = p1.pixels[x][y]
+                    pxl += orig_image_x_y * k.mask[s][t]
+
+            new_row.append(pxl)
+
+        p2.pixels[i] = new_row
+
+    if normalize:
+        p2.normalize_intensity_values()
+    if truncate:
+        p2.truncate_intensity_values()
+
+    return p2
+
+def averaging_filtered(
+    pgm_filename: str, k: Kernel, normalize=False, truncate=False
+) -> PGMImage:
+    """
+    Return an image with the averaging filter `k` applied to it.
+
+    :param pgm_filename file name of image to perform filter on
+    :param k a kernel of the spatial filter we want to apply
+    """
+    p1, p2 = PGMImage(pgm_filename), PGMImage(pgm_filename)
+
+    for i in range(p1.rows):
+        new_row = []
+        for j in range(p1.cols):
+
+            pxl = 0
+            for s in range(k.rows):
+                for t in range(k.cols):
+                    x, y = i - int(k.rows / 2) + s, j - int(k.cols / 2) + t
+
+                    # Pad edges of the image with zeros
+                    if x < 0 or x >= p1.rows or y < 0 or y >= p1.cols:
+                        orig_image_x_y = 0
+                    else:
+                        orig_image_x_y = p1.pixels[x][y]
+                    pxl += orig_image_x_y * k.mask[s][t]
+
+            new_row.append(pxl)
+
+        p2.pixels[i] = new_row
+
+    if normalize:
+        p2.normalize_intensity_values()
+    if truncate:
+        p2.truncate_intensity_values()
+
+    return p2
 
 def run_tests():
     def test_1_identity_filter():
